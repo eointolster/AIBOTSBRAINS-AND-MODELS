@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Direction Prediction AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>3D Direction Prediction AI</h1>
+        <div class="model-container">
+            <div class="model-section">
+                <h2>2D Model</h2>
+                <div class="grid-container">
+                    <canvas id="gridCanvas" width="560" height="560"></canvas>
+                </div>
+                <div class="controls">
+                    <button id="startTrainBtn">Start Training</button>
+                    <button id="stopTrainBtn">Stop Training</button>
+                    <button id="predictBtn">Predict</button>
+                    <button id="saveModelBtn">Save Model</button>
+                </div>
+                <div class="results">
+                    <p>Predicted Angle: <span id="predictedAngle"></span></p>
+                    <p>Correct Angle: <span id="correctAngle"></span></p>
+                    <p>Is Correct: <span id="isCorrect"></span></p>
+                </div>
+                <div class="training-stats">
+                    <p>Training Iterations: <span id="trainingIterations">0</span></p>
+                    <p>Current Loss: <span id="currentLoss">0</span></p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lossChart"></canvas>
+                </div>
+            </div>
+            <div class="model-section">
+                <h2>3D Model</h2>
+                <div id="3d-container"></div>
+                <div class="controls">
+                    <button id="start3DTrainBtn">Start 3D Training</button>
+                    <button id="stop3DTrainBtn">Stop 3D Training</button>
+                    <button id="predict3DBtn">Predict 3D</button>
+                    <button id="save3DModelBtn">Save 3D Model</button>
+                </div>
+                <div class="results">
+                    <p>Predicted 3D Direction: <span id="predicted3DDirection"></span></p>
+                    <p>Correct 3D Direction: <span id="correct3DDirection"></span></p>
+                    <p>Is Correct: <span id="is3DCorrect"></span></p>
+                </div>
+                <div class="training-stats">
+                    <p>3D Training Iterations: <span id="training3DIterations">0</span></p>
+                    <p>Current 3D Loss: <span id="current3DLoss">0</span></p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="loss3DChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/3d_script.js') }}"></script>
+</body>
+</html>

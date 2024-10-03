@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Escape Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <div id="start-menu">
+            <h1>AI Escape Game</h1>
+            <label for="num-bots">Number of AI Bots:</label>
+            <select id="num-bots">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <label for="ai-mode">AI Mode:</label>
+            <select id="ai-mode">
+                <option value="llm">LLM</option>
+                <option value="direction_model">Direction Model</option>
+            </select>
+            <button id="start-game">Start Game</button>
+        </div>
+        <div id="game-board"></div>
+        <div id="game-over" style="display: none;">
+            <h2>Game Over</h2>
+            <p id="winner-message"></p>
+            <button id="restart-game">Restart</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+Certainly! I'll create a README.md file that explains how to use the saved model file. This README will cover the basics of loading and using the saved model, as well as provide some context about the project.
+
+Here's the content for your README.md file:
+
+```markdown
+# Direction Prediction AI
+
+This project implements a neural network that predicts the direction (angle) between two points on a 28x28 grid.
+
+## Overview
+
+The AI learns to predict the angle between a start point (red square) and an end point (green square) on a grid. The model is trained on randomly generated data points and can be saved for later use.
+
+## Requirements
+
+- Python 3.7+
+- TensorFlow 2.x
+- Flask
+- NumPy
+
+## How to Use the Saved Model
+
+After training the model using the web interface, you can save it by clicking the "Save Model" button. This creates a file named `direction_model.h5` in your project directory. Here's how you can use this saved model:
+
+1. Load the model:
+
+```python
+import tensorflow as tf
+import numpy as np
+
+# Load the saved model
+loaded_model = tf.keras.models.load_model('direction_model.h5')
+```
+
+2. Make predictions:
+
+```python
+# Function to predict angle
+def predict_angle(start_x, start_y, end_x, end_y):
+    input_data = np.array([[start_x, start_y, end_x, end_y]])
+    predicted_angle = loaded_model.predict(input_data)
+    return predicted_angle[0][0]
+
+# Example usage
+start_x, start_y = 0, 0
+end_x, end_y = 27, 27
+predicted_angle = predict_angle(start_x, start_y, end_x, end_y)
+print(f"Predicted angle: {predicted_angle}")
+```
+
+3. Interpret the results:
+
+The predicted angle is in radians. You can convert it to degrees if needed:
+
+```python
+import math
+
+angle_degrees = math.degrees(predicted_angle)
+print(f"Predicted angle in degrees: {angle_degrees}")
+```
+
+4. Visualize the prediction (optional):
+
+```python
+import matplotlib.pyplot as plt
+
+def plot_prediction(start_x, start_y, end_x, end_y, angle):
+    plt.figure(figsize=(8, 8))
+    plt.xlim(0, 28)
+    plt.ylim(0, 28)
+    plt.grid(True)
+    
+    plt.plot(start_x, start_y, 'ro', markersize=10)  # Start point
+    plt.plot(end_x, end_y, 'go', markersize=10)  # End point
+    
+    # Plot the predicted direction
+    length = 5  # Length of the direction line
+    dx = length * math.cos(angle)
+    dy = length * math.sin(angle)
+    plt.arrow(start_x, start_y, dx, dy, head_width=0.5, head_length=0.7, fc='b', ec='b')
+    
+    plt.title(f"Predicted Angle: {math.degrees(angle):.2f} degrees")
+    plt.show()
+
+# Example usage
+plot_prediction(start_x, start_y, end_x, end_y, predicted_angle)
+```
+
+## Notes
+
+- The model predicts angles in radians, ranging from -π to π.
+- The input to the model should be normalized to the range [0, 1] if you're using custom input that's not on the 28x28 grid.
+- The accuracy of predictions may vary based on the amount and quality of training data.
+
+## Further Improvements
+
+- Experiment with different model architectures or hyperparameters.
+- Implement data augmentation to improve generalization.
+- Add functionality to continue training a loaded model with new data.
+
+```
+
+This README provides a basic guide on how to use the saved model file. It includes:
+
+1. An overview of the project
+2. Requirements
+3. Step-by-step instructions on loading and using the saved model
+4. An example of how to visualize the predictions
+5. Some notes and suggestions for further improvements
+
+You can save this as `README.md` in your project's root directory. This will help you and others understand how to use the saved model file in the future, and provides context about the project's purpose and functionality.

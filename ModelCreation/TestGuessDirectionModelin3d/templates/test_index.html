@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Direction Prediction Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">3D Direction Prediction Test</div>
+    <script>
+        let scene, camera, renderer, controls;
+        let startPoint, endPoint, predictedLine, actualLine;
+        let randomTestBtn;
+        let gui;
+
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Add OrbitControls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+            // Add a grid helper
+            const gridHelper = new THREE.GridHelper(10, 10);
+            scene.add(gridHelper);
+
+            // Set up camera position
+            camera.position.set(5, 5, 5);
+            camera.lookAt(0, 0, 0);
+
+            // Create geometry for start and end points
+            startPoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 32, 32),
+                new THREE.MeshBasicMaterial({color: 0xff0000})
+            );
+            endPoint = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 32, 32),
+                new THREE.MeshBasicMaterial({color: 0x00ff00})
+            );
+            scene.add(startPoint);
+            scene.add(endPoint);
+
+            // Create lines for actual and predicted directions
+            const lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
+            actualLine = new THREE.Line(new THREE.BufferGeometry(), lineMaterial);
+            predictedLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({color: 0xffff00}));
+            scene.add(actualLine);
+            scene.add(predictedLine);
+
+            // Add GUI for manual testing
+            gui = new dat.GUI();
+            const params = {
+                startX: 0, startY: 0, startZ: 0,
+                endX: 1, endY: 1, endZ: 1,
+                test: function() { testPrediction(); }
+            };
+            gui.add(params, 'startX', -5, 5);
+            gui.add(params, 'startY', -5, 5);
+            gui.add(params, 'startZ', -5, 5);
+            gui.add(params, 'endX', -5, 5);
+            gui.add(params, 'endY', -5, 5);
+            gui.add(params, 'endZ', -5, 5);
+            gui.add(params, 'test');
+
+            // Add button for random testing
+            randomTestBtn = document.createElement('button');
+            randomTestBtn.textContent = 'Random Test';
+            randomTestBtn.style.position = 'absolute';
+            randomTestBtn.style.top = '10px';
+            randomTestBtn.style.left = '10px';
+            document.body.appendChild(randomTestBtn);
+            randomTestBtn.addEventListener('click', runRandomTest);
+
+            animate();
+        }
+
+        function testPrediction() {
+            const params = {};
+            for (let i in gui.__controllers) {
+                const controller = gui.__controllers[i];
+                params[controller.property] = controller.object[controller.property];
+            }
+            const positions = [params.startX, params.startY, params.startZ, params.endX, params.endY, params.endZ];
+            fetch('/test_prediction', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({positions: positions})
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Received data:", data);  // Debug log
+                if (data.error) {
+                    console.error(data.error);
+                    document.getElementById('info').textContent = data.error;
+                } else {
+                    updateScene(data);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function runRandomTest() {
+            fetch('/random_test')
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Received data:", data);  // Debug log
+                    if (data.error) {
+                        console.error(data.error);
+                        document.getElementById('info').textContent = data.error;
+                    } else {
+                        updateScene(data);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateScene(data) {
+            console.log("Updating scene with data:", data);  // Debug log
+            if (!data.start_position || !data.end_position || !data.predicted_direction || !data.correct_direction) {
+                console.error("Invalid data received:", data);
+                return;
+            }
+            startPoint.position.set(data.start_position[0], data.start_position[1], data.start_position[2]);
+            endPoint.position.set(data.end_position[0], data.end_position[1], data.end_position[2]);
+
+            const actualDirection = new THREE.Vector3().fromArray(data.correct_direction);
+            const predictedDirection = new THREE.Vector3().fromArray(data.predicted_direction);
+
+            actualLine.geometry.setFromPoints([
+                startPoint.position,
+                endPoint.position
+            ]);
+
+            predictedLine.geometry.setFromPoints([
+                startPoint.position,
+                startPoint.position.clone().add(predictedDirection)
+            ]);
+
+            document.getElementById('info').textContent = `Angle Difference: ${data.angle_difference.toFixed(2)}°`;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
